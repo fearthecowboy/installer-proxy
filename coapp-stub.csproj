@@ -109,23 +109,33 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo [BEGIN POST BUILD]
+    <PostBuildEvent>echo on 
+
+echo [BEGIN POST BUILD]
 
 echo "=== Copy Files ==="
 echo copy "$(ProjectDir)coapp-engine.manifest" "$(TargetDir)coapp-engine.manifest"
 copy "$(ProjectDir)coapp-engine.manifest" "$(TargetDir)coapp-engine.manifest"
+
 echo "$(ProjectDir)coapp-engine.wxs" "$(TargetDir)coapp-engine.wxs"
 copy "$(ProjectDir)coapp-engine.wxs" "$(TargetDir)coapp-engine.wxs"
+
+echo copy "$(ProjectDir)policy.1.0.coapp-engine.manifest" "$(TargetDir)policy.1.0.coapp-engine.manifest"
+copy "$(ProjectDir)policy.1.0.coapp-engine.manifest" "$(TargetDir)policy.1.0.coapp-engine.manifest"
 
 echo "=== Sign EXE ==="
 signtool sign /v /t  http://timestamp.verisign.com/scripts/timestamp.dll /f "$(SolutionDir)..\coapp-solution\CoAppTest.pfx" /p password "$(TargetPath)"
 
 echo "=== Create Catalog ==="
-"C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin\mt.exe" -manifest "$(TargetDir)coapp-engine.manifest" -hashupdate -makecdfs
+mt.exe -manifest "$(TargetDir)coapp-engine.manifest" -hashupdate -makecdfs
 makecat "$(TargetDir)coapp-engine.manifest.cdf" 
+
+mt.exe -manifest "$(TargetDir)policy.1.0.coapp-engine.manifest" -hashupdate -makecdfs
+makecat "$(TargetDir)policy.1.0.coapp-engine.manifest.cdf" 
 
 echo "=== Sign Catalog ==="
 signtool sign /v /t  http://timestamp.verisign.com/scripts/timestamp.dll /f "$(SolutionDir)..\coapp-solution\CoAppTest.pfx" /p password "$(TargetDir)coapp-engine.cat" 
+signtool sign /v /t  http://timestamp.verisign.com/scripts/timestamp.dll /f "$(SolutionDir)..\coapp-solution\CoAppTest.pfx" /p password "$(TargetDir)policy.1.0.coapp-engine.cat" 
 
 echo "=== Create MSI ==="
 "c:\Program Files (x86)\Windows Installer XML v3.5\bin\candle.exe" "$(TargetDir)coapp-engine.wxs "

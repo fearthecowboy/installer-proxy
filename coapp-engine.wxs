@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="CoApp Engine (Developer Test Edition)" Language="1033" Version="1.0.0.1" Manufacturer="Garrett Serack (CoApp Project)" >
+	<Product Id="*" Name="CoApp Engine (Developer Test Edition)" Language="1033" Version="1.0.0.2" Manufacturer="Garrett Serack (CoApp Project)" >
 		<Package InstallerVersion="200" Compressed="yes" />
 
 		<Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />

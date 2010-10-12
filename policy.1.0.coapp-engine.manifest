@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-    <assemblyIdentity type="win32-policy" publicKeyToken="0da32de74420310f" name="policy.1.0.coapp-engine" version="1.0.0.1" processorArchitecture="x86"/>
+    <assemblyIdentity type="win32-policy" publicKeyToken="0da32de74420310f" name="policy.1.0.coapp-engine" version="1.0.0.2" processorArchitecture="x86"/>
     <dependency>
         <dependentAssembly>
             <assemblyIdentity type="win32" publicKeyToken="0da32de74420310f" name="coapp-engine" processorArchitecture="x86"/>
-            <bindingRedirect oldVersion="1.0.0.0-1.0.0.0" newVersion="1.0.0.1"/>
+            <bindingRedirect oldVersion="1.0.0.0-1.0.0.1" newVersion="1.0.0.2"/>
         </dependentAssembly>
     </dependency>
 </assembly>

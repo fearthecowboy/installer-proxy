@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-    <assemblyIdentity type="win32" name="coapp-engine" version="1.0.0.0" processorArchitecture="x86" publicKeyToken="0da32de74420310f"></assemblyIdentity>
+    <assemblyIdentity type="win32" name="coapp-engine" version="1.0.0.2" processorArchitecture="x86" publicKeyToken="0da32de74420310f"></assemblyIdentity>
     <file name="coapp-installer.exe" hashalg="SHA1" />
 </assembly>
