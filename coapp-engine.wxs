@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="CoApp Engine (Developer Test Edition)" Language="1033" Version="1.0.0.1" Manufacturer="Garrett Serack (CoApp Project)" >
+		<Package InstallerVersion="200" Compressed="yes" />
+
+		<Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLLOCATION" Name="Install_CoAppEngine">
+					<Component Id="coappengine_component" Guid="5AA81C19-46D5-4964-A208-C7481EDF7788"> 
+						<!-- TODO: Insert files, registry keys, and other resources here. -->
+            
+                        <File Id="coapp_installer"          Name="coapp-installer.exe"      Source="coapp-installer.exe"    Vital="yes" AssemblyManifest="coappengine_manifest" Assembly="win32" KeyPath="yes" />
+                        <File Id="coappengine_manifest"     Name="coapp-engine.manifest"    Source="coapp-engine.manifest"  Vital="yes" />
+                        <File Id="coappengine_catalog"      Name="coapp-engine.cat"         Source="coapp-engine.cat"       Vital="yes" />
+                    </Component>
+                    
+					<Component Id="coappengine_policy_component" Guid="72A6677D-577A-4235-848F-8A869AB429EE"> 
+						<!-- TODO: Insert files, registry keys, and other resources here. -->
+                        <File Id="coappengine_policy_manifest"    Name="policy.1.0.coapp-engine.manifest"    Source="policy.1.0.coapp-engine.manifest"  Vital="yes" AssemblyManifest="coappengine_policy_manifest" Assembly="win32" KeyPath="yes" />
+                        <File Id="coappengine_policy_catalog"     Name="policy.1.0.coapp-engine.cat"         Source="policy.1.0.coapp-engine.cat"       Vital="yes" />                        
+                    </Component>
+                </Directory>
+            </Directory>
+		</Directory>
+        
+		<Feature Id="ProductFeature" Title="Install_CoAppEngineFeature" Level="1">
+			<!-- TODO: Remove the comments around this ComponentRef element and the Component above in order to add resources to this installer. -->
+			<ComponentRef Id="coappengine_component" /> 
+            <ComponentRef Id="coappengine_policy_component" /> 
+		</Feature>
+	</Product>
+</Wix>
