@@ -1,4 +1,4 @@
-﻿namespace coapp_stub {
+﻿namespace CoApp.Installer {
     partial class StubWindow {
         /// <summary>
         /// Required designer variable.

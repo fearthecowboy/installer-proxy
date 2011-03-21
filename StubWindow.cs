@@ -4,19 +4,153 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace coapp_stub {
+namespace CoApp.Installer {
     using System;
-    using System.Windows.Forms;
+    using System.Diagnostics;
     using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Runtime.InteropServices;
+    using System.Text;
+    using System.Windows.Forms;
     using Microsoft.Win32;
 
-    public partial class StubWindow :Form {
+    public partial class StubWindow : Form {
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern uint SearchPath(string lpPath, string lpFileName, string lpExtension, int nBufferLength,
+            [MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpBuffer, out IntPtr lpFilePart);
+
+        private static string FindInPath(string filename) {
+            try {
+                var s = new StringBuilder(260); // MAX_PATH
+                var p = new IntPtr();
+
+                SearchPath(null, filename, null, s.Capacity, s, out p);
+
+                return s.ToString();
+            }
+            catch {
+            }
+
+            return string.Empty;
+        }
 
         [STAThread]
-        static void Main() {
+        private static void Main(string[] args) {
+            if (args.Length > 0 ) {
+                var msiPath = string.Join(" ", args);
+                msiPath = Path.GetFullPath(msiPath);
+
+                if (msiPath.EndsWith(".msi", StringComparison.CurrentCultureIgnoreCase) && File.Exists(msiPath)) {
+                    
+                    var path = SearchForCoApp();
+                    if (File.Exists(path)) {
+                        RunInstaller(path, msiPath);
+                        return;
+                    }
+                    MessageBox.Show("You've attempted to install a CoApp package, but the actual package installer can not be located.  You will have to select the EXE to run for CoApp packages and retry the installation.", "CoApp Installer", MessageBoxButtons.OK,MessageBoxIcon.Exclamation);
+                }
+            }
+
+            // didn't work (or ran in interactive mode). Show Dialog.
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new StubWindow());
+        }
+
+        public static string SearchForCoApp() {
+            var thisAssemblyVersion = Version(Assembly.GetEntryAssembly().Location);
+
+            var path = CoAppInstallerPath;
+            if (!string.IsNullOrEmpty(path) && File.Exists(path)) {
+                return path;
+            }
+
+            // try to find coapp.exe as the installer 
+
+            // search PATH
+            // search in c:\apps\bin\...
+            // search in c:\apps\.installed\outercurve foundation\...
+            try {
+                path = FindInPath("coapp.exe");
+                if (!string.IsNullOrEmpty(path) && File.Exists(path) && Version(path) >= thisAssemblyVersion) {
+                    // remember this location, it was found in a good spot.
+                    CoAppInstallerPath = path;
+                    return path;
+                }
+            }
+            catch {
+            }
+
+            try {
+                var possibilities = Directory.EnumerateFiles(@"c:\apps\bin", "coapp.exe", SearchOption.AllDirectories);
+                foreach (var each in possibilities.Where(each => Version(each) >= thisAssemblyVersion)) {
+                    // remember this location, it was found in a good spot.
+                    CoAppInstallerPath = each;
+                    return each;
+                }
+            }
+            catch {
+            }
+
+            try {
+                var possibilities = Directory.EnumerateFiles(@"c:\apps\.installed\Outercurve Foundation\", "coapp*.exe",
+                    SearchOption.AllDirectories);
+                foreach (var each in possibilities.Where(each => Version(each) >= thisAssemblyVersion)) {
+                    return each;
+                }
+            }
+            catch {
+            }
+
+            return string.Empty;
+        }
+
+        public static int PositionOfFirstCharacterNotIn(string str, char[] characters) {
+            var p = 0;
+            while (p < str.Length) {
+                if (!characters.Contains(str[p])) {
+                    return p;
+                }
+                p++;
+            }
+            return p;
+        }
+
+        public static ulong Version(string path) {
+            FileVersionInfo info = FileVersionInfo.GetVersionInfo(path);
+            string fv = info.FileVersion;
+            if (!string.IsNullOrEmpty(fv)) {
+                fv = fv.Substring(0, PositionOfFirstCharacterNotIn(fv, "0123456789.".ToCharArray()));
+            }
+
+            if (string.IsNullOrEmpty(fv)) {
+                return 0;
+            }
+
+            var vers = fv.Split('.');
+            var major = vers.Length > 0 ? ToInt32(vers[0], 0) : 0;
+            var minor = vers.Length > 1 ? ToInt32(vers[1], 0) : 0;
+            var build = vers.Length > 2 ? ToInt32(vers[2], 0) : 0;
+            var revision = vers.Length > 3 ? ToInt32(vers[3], 0) : 0;
+
+            return (((UInt64) major) << 48) + (((UInt64) minor) << 32) + (((UInt64) build) << 16) + (UInt64) revision;
+        }
+
+        public static int ToInt32(string str, int defaultValue) {
+            var i = defaultValue;
+            Int32.TryParse(str, out i);
+            return i;
+        }
+
+
+        public static void RunInstaller(string path, string msi) {
+            var processInfo = new ProcessStartInfo {
+                Verb = "runas",
+                FileName = path,
+                Arguments = "\"" + msi + "\""
+            };
+            Process.Start(processInfo);
         }
 
         public StubWindow() {
@@ -27,8 +161,7 @@ namespace coapp_stub {
 
         private const string CoAppRegRoot = @"Software\CoApp";
         private const string CoAppRegRoot2 = @"Software\Wow6432Node\CoApp";
-
-        private const string CoAppInstallerKey= @"CoAppInstaller";
+        private const string CoAppInstallerKey = @"CoAppInstaller";
 
         private static string CoAppInstallerPath {
             get {
@@ -38,21 +171,24 @@ namespace coapp_stub {
                 try {
                     regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot);
 
-                    if(null != regkey)
+                    if (null != regkey) {
                         result = regkey.GetValue(CoAppInstallerKey, null) as string;
+                    }
                 }
                 catch {
                 }
                 finally {
-                    if(null != regkey)
+                    if (null != regkey) {
                         regkey.Close();
+                    }
                 }
 
-                if(string.IsNullOrEmpty(result) && IntPtr.Size == 8) {
-                    try { // x64 platform, check if the x86 key is set.
+                if (string.IsNullOrEmpty(result) && IntPtr.Size == 8) {
+                    try {
+                        // x64 platform, check if the x86 key is set.
                         regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot2);
 
-                        if(null != regkey) {
+                        if (null != regkey) {
                             result = regkey.GetValue(CoAppInstallerKey, null) as string;
                             CoAppInstallerPath = result; // make sure both copies are to this value.
                         }
@@ -60,10 +196,10 @@ namespace coapp_stub {
                     catch {
                     }
                     finally {
-                        if(null != regkey)
+                        if (null != regkey) {
                             regkey.Close();
+                        }
                     }
-                    
                 }
 
                 return result;
@@ -74,33 +210,38 @@ namespace coapp_stub {
                 try {
                     regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot);
 
-                    if(null == regkey)
+                    if (null == regkey) {
                         return;
+                    }
 
                     regkey.SetValue(CoAppInstallerKey, value);
                 }
                 catch {
                 }
                 finally {
-                    if(null != regkey)
+                    if (null != regkey) {
                         regkey.Close();
+                    }
                 }
 
-                
-                if(IntPtr.Size == 8) { // x64 platform, set the x86 key as well.
+
+                if (IntPtr.Size == 8) {
+                    // x64 platform, set the x86 key as well.
                     try {
                         regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot2);
 
-                        if(null == regkey)
+                        if (null == regkey) {
                             return;
+                        }
 
                         regkey.SetValue(CoAppInstallerKey, value);
                     }
                     catch {
                     }
                     finally {
-                        if(null != regkey)
+                        if (null != regkey) {
                             regkey.Close();
+                        }
                     }
                 }
             }
@@ -114,17 +255,20 @@ namespace coapp_stub {
             openFileDialog1.DefaultExt = ".exe";
             openFileDialog1.ShowDialog();
 
-            if(File.Exists(openFileDialog1.FileName))
+            if (File.Exists(openFileDialog1.FileName)) {
                 textBox1.Text = openFileDialog1.FileName;
-
+            }
         }
 
         private void button2_Click(object sender, EventArgs e) {
             textBox1.Text = textBox1.Text.Trim();
 
-            if(!string.IsNullOrEmpty(textBox1.Text) && !File.Exists(textBox1.Text)) {
-                if(MessageBox.Show("Target program [" + textBox1.Text + "] does not exist. Save Anyway?","Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            if (!string.IsNullOrEmpty(textBox1.Text) && !File.Exists(textBox1.Text)) {
+                if (
+                    MessageBox.Show("Target program [" + textBox1.Text + "] does not exist. Save Anyway?", "Warning",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) {
                     return;
+                }
             }
             CoAppInstallerPath = textBox1.Text;
             button2.Enabled = false;
@@ -140,4 +284,3 @@ namespace coapp_stub {
         }
     }
 }
-

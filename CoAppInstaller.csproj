@@ -8,8 +8,8 @@
     <ProjectGuid>{8D2A182F-A781-482F-8C65-3B0D638FF700}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>coapp_stub</RootNamespace>
-    <AssemblyName>coapp-installer</AssemblyName>
+    <RootNamespace>CoApp.Installer</RootNamespace>
+    <AssemblyName>CoApp.Installer</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -68,7 +68,35 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>coapp_stub.StubWindow</StartupObject>
+    <StartupObject>CoApp.Installer.StubWindow</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\output\any\debug\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\coapp-stub.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>..\output\any\release\bin\</OutputPath>
+    <DefineConstants>TRACE;SIGN_ASSEMBLY</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\coapp-stub.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -85,6 +113,7 @@
       <DependentUpon>StubWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="$(SolutionDir)\..\coapp-solution\Source\AssemblyStrongName.cs" />
     <EmbeddedResource Include="StubWindow.resx">
       <DependentUpon>StubWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -96,6 +125,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -114,35 +144,15 @@
 echo [BEGIN POST BUILD]
 
 echo "=== Copy Files ==="
-echo copy "$(ProjectDir)coapp-engine.manifest" "$(TargetDir)coapp-engine.manifest"
-copy "$(ProjectDir)coapp-engine.manifest" "$(TargetDir)coapp-engine.manifest"
+echo copy "$(ProjectDir)coapp.installer.manifest" "$(TargetDir)coapp.installer.manifest"
+copy "$(ProjectDir)coapp.installer.manifest" "$(TargetDir)coapp.installer.manifest"
 
-echo "$(ProjectDir)coapp-engine.wxs" "$(TargetDir)coapp-engine.wxs"
-copy "$(ProjectDir)coapp-engine.wxs" "$(TargetDir)coapp-engine.wxs"
+echo "$(ProjectDir)coapp.installer.wxs" "$(TargetDir)coapp.installer.wxs"
+copy "$(ProjectDir)coapp.installer.wxs" "$(TargetDir)coapp.installer.wxs"
 
-echo copy "$(ProjectDir)policy.1.0.coapp-engine.manifest" "$(TargetDir)policy.1.0.coapp-engine.manifest"
-copy "$(ProjectDir)policy.1.0.coapp-engine.manifest" "$(TargetDir)policy.1.0.coapp-engine.manifest"
-
-echo "=== Sign EXE ==="
-signtool sign /v /t  http://timestamp.verisign.com/scripts/timestamp.dll /f "$(SolutionDir)..\coapp-solution\CoAppTest.pfx" /p password "$(TargetPath)"
-
-echo "=== Create Catalog ==="
-mt.exe -manifest "$(TargetDir)coapp-engine.manifest" -hashupdate -makecdfs
-makecat "$(TargetDir)coapp-engine.manifest.cdf" 
-
-mt.exe -manifest "$(TargetDir)policy.1.0.coapp-engine.manifest" -hashupdate -makecdfs
-makecat "$(TargetDir)policy.1.0.coapp-engine.manifest.cdf" 
-
-echo "=== Sign Catalog ==="
-signtool sign /v /t  http://timestamp.verisign.com/scripts/timestamp.dll /f "$(SolutionDir)..\coapp-solution\CoAppTest.pfx" /p password "$(TargetDir)coapp-engine.cat" 
-signtool sign /v /t  http://timestamp.verisign.com/scripts/timestamp.dll /f "$(SolutionDir)..\coapp-solution\CoAppTest.pfx" /p password "$(TargetDir)policy.1.0.coapp-engine.cat" 
-
-echo "=== Create MSI ==="
-"c:\Program Files (x86)\Windows Installer XML v3.5\bin\candle.exe" "$(TargetDir)coapp-engine.wxs "
-"c:\Program Files (x86)\Windows Installer XML v3.5\bin\light.exe" "$(TargetDir)coapp-engine.wixobj"
-
-echo "=== Sign MSI ==="
-signtool sign /v /t  http://timestamp.verisign.com/scripts/timestamp.dll /f "$(SolutionDir)..\coapp-solution\CoAppTest.pfx" /p password "$(TargetDir)coapp-engine.msi"
+echo copy "$(ProjectDir)policy.1.0.coapp.installer.manifest" "$(TargetDir)policy.1.0.coapp.installer.manifest"
+copy "$(ProjectDir)policy.1.0.coapp.installer.manifest" "$(TargetDir)policy.1.0.coapp.installer.manifest"
+copy "$(ProjectDir)make-installer-msi.cmd" "$(TargetDir)make-installer-msi.cmd"
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

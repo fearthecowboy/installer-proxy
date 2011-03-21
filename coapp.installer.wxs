@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="CoApp Installer" Language="1033" Manufacturer="Outercurve Foundation (CoApp Project)" Version="1.0.2.338" >
+		<Package InstallerVersion="200" Compressed="yes" />
+
+		<Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLLOCATION" Name="Install_CoAppInstaller">
+					<Component Id="coappinstaller_component" Guid="a9763808-c606-cfa9-0f97-b9e5adad681a"> 
+                        <File Id="coapp_installer"          Name="coapp.installer.exe"      Source="coapp.installer.exe"    Vital="yes" AssemblyManifest="coappinstaller_manifest" Assembly="win32" KeyPath="yes" />
+                        <File Id="coappinstaller_manifest"     Name="coapp.installer.manifest"    Source="coapp.installer.manifest"  Vital="yes" />
+                        <File Id="coappinstaller_catalog"      Name="coapp.installer.cat"         Source="coapp.installer.cat"       Vital="yes" />
+                    </Component>
+                    
+					<Component Id="coappinstaller_policy_component" Guid="2684ccb3-9fd5-1a0e-8ea7-426b59d27f15"> 
+                        <File Id="coappinstaller_policy_manifest"    Name="policy.1.0.coapp.installer.manifest"    Source="policy.1.0.coapp.installer.manifest"  Vital="yes" AssemblyManifest="coappinstaller_policy_manifest" Assembly="win32" KeyPath="yes" />
+                        <File Id="coappinstaller_policy_catalog"     Name="policy.1.0.coapp.installer.cat"         Source="policy.1.0.coapp.installer.cat"       Vital="yes" />                        
+                    </Component>
+                </Directory>
+            </Directory>
+		</Directory>
+        
+		<Feature Id="ProductFeature" Title="Install_CoAppInstallerFeature" Level="1">
+			<ComponentRef Id="coappinstaller_component" /> 
+            <ComponentRef Id="coappinstaller_policy_component" /> 
+		</Feature>
+	</Product>
+</Wix>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
