@@ -11,6 +11,7 @@ namespace CoApp.Installer {
     using System.Linq;
     using System.Reflection;
     using System.Runtime.InteropServices;
+    using System.Security.Principal;
     using System.Text;
     using System.Windows.Forms;
     using Microsoft.Win32;
@@ -143,13 +144,22 @@ namespace CoApp.Installer {
             return i;
         }
 
+        public static bool IsAdmin {
+            get {
+                return new WindowsPrincipal( WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+            }
+        }
 
         public static void RunInstaller(string path, string msi) {
             var processInfo = new ProcessStartInfo {
-                Verb = "runas",
                 FileName = path,
                 Arguments = "\"" + msi + "\""
             };
+
+            if( !IsAdmin ) {
+                processInfo.Verb = "runas";
+            }
+
             Process.Start(processInfo);
         }
 

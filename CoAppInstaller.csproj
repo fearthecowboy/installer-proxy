@@ -98,6 +98,15 @@
     <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Test|x86'">
+    <OutputPath>bin\x86\Test\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Test|x64'">
+    <OutputPath>bin\x64\Test\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Test|AnyCPU'">
+    <OutputPath>bin\Test\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -127,6 +136,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="coapp.installer.manifest" />
+    <None Include="coapp.installer.wxs" />
+    <None Include="make-installer-msi.cmd" />
+    <None Include="policy.1.0.coapp.installer.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -140,6 +153,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo on 
+if NOT "$(ConfigurationName)" == "Release" goto FIN
+
 
 echo [BEGIN POST BUILD]
 
@@ -153,7 +168,12 @@ copy "$(ProjectDir)coapp.installer.wxs" "$(TargetDir)coapp.installer.wxs"
 echo copy "$(ProjectDir)policy.1.0.coapp.installer.manifest" "$(TargetDir)policy.1.0.coapp.installer.manifest"
 copy "$(ProjectDir)policy.1.0.coapp.installer.manifest" "$(TargetDir)policy.1.0.coapp.installer.manifest"
 copy "$(ProjectDir)make-installer-msi.cmd" "$(TargetDir)make-installer-msi.cmd"
-</PostBuildEvent>
+
+cd "$(TargetDir)"
+start /wait cmd.exe /c "$(TargetDir)make-installer-msi.cmd"
+
+:FIN
+echo (complete!)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
