@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="CoApp Installer" Language="1033" Manufacturer="Outercurve Foundation (CoApp Project)" Version="1.0.2.831" >
+	<Product Id="*" Name="CoApp Installer" Language="1033" Manufacturer="Outercurve Foundation (CoApp Project)" Version="1.0.2.837" >
 		<Package InstallerVersion="200" Compressed="yes" InstallPrivileges="elevated" /> <!--  InstallPrivileges="limited"  is to tell Installer not to elevate to install this (the bootstrapper will elevate) -->
 
 		<Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
@@ -11,13 +11,13 @@
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="ProgramFilesFolder">
 				<Directory Id="INSTALLLOCATION" Name="Install_CoAppInstaller">
-					<Component Id="coappinstaller_component" Guid="eecc0b57-7712-017b-3e0b-d6c74e9b860d"> 
+					<Component Id="coappinstaller_component" Guid="2ed57aa0-091e-b891-a638-285258437791"> 
                         <File Id="coapp_installer"          Name="coapp.installer.exe"      Source="coapp.installer.exe"    Vital="yes" AssemblyManifest="coappinstaller_manifest" Assembly="win32" KeyPath="yes" />
                         <File Id="coappinstaller_manifest"     Name="coapp.installer.manifest"    Source="coapp.installer.manifest"  Vital="yes" />
                         <File Id="coappinstaller_catalog"      Name="coapp.installer.cat"         Source="coapp.installer.cat"       Vital="yes" />
                     </Component>
                     
-					<Component Id="coappinstaller_policy_component" Guid="997a3fa1-83ca-4620-6722-70097d4654d2"> 
+					<Component Id="coappinstaller_policy_component" Guid="1ca72ecd-d178-7337-7969-ba2106fa08b2"> 
                         <File Id="coappinstaller_policy_manifest"    Name="policy.1.0.coapp.installer.manifest"    Source="policy.1.0.coapp.installer.manifest"  Vital="yes" AssemblyManifest="coappinstaller_policy_manifest" Assembly="win32" KeyPath="yes" />
                         <File Id="coappinstaller_policy_catalog"     Name="policy.1.0.coapp.installer.cat"         Source="policy.1.0.coapp.installer.cat"       Vital="yes" />                        
                     </Component>
@@ -31,6 +31,17 @@
 		</Feature>
 	</Product>
 </Wix>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
