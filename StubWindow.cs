@@ -39,6 +39,11 @@ namespace CoApp.Installer {
         [STAThread]
         private static void Main(string[] args) {
             if (args.Length > 0 ) {
+                if( args.First() == "update" ) {
+                    // try to run coapp-update first. 
+                    // 
+                }
+
                 var msiPath = string.Join(" ", args);
                 msiPath = Path.GetFullPath(msiPath);
 
@@ -95,7 +100,7 @@ namespace CoApp.Installer {
             }
 
             try {
-                var possibilities = Directory.EnumerateFiles(@"c:\apps\.installed\Outercurve Foundation\", "coapp*.exe",
+                var possibilities = Directory.EnumerateFiles(@"c:\apps\.installed\Outercurve Foundation\", "coapp.exe",
                     SearchOption.AllDirectories);
                 foreach (var each in possibilities.Where(each => Version(each) >= thisAssemblyVersion)) {
                     return each;
@@ -170,8 +175,7 @@ namespace CoApp.Installer {
         }
 
         private const string CoAppRegRoot = @"Software\CoApp";
-        private const string CoAppRegRoot2 = @"Software\Wow6432Node\CoApp";
-        private const string CoAppInstallerKey = @"CoAppInstaller";
+        private const string CoAppInstallerKey = @"Installer";
 
         private static string CoAppInstallerPath {
             get {
@@ -179,7 +183,7 @@ namespace CoApp.Installer {
                 string result = null;
 
                 try {
-                    regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot);
+                    regkey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry64).CreateSubKey(CoAppRegRoot);
 
                     if (null != regkey) {
                         result = regkey.GetValue(CoAppInstallerKey, null) as string;
@@ -193,32 +197,13 @@ namespace CoApp.Installer {
                     }
                 }
 
-                if (string.IsNullOrEmpty(result) && IntPtr.Size == 8) {
-                    try {
-                        // x64 platform, check if the x86 key is set.
-                        regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot2);
-
-                        if (null != regkey) {
-                            result = regkey.GetValue(CoAppInstallerKey, null) as string;
-                            CoAppInstallerPath = result; // make sure both copies are to this value.
-                        }
-                    }
-                    catch {
-                    }
-                    finally {
-                        if (null != regkey) {
-                            regkey.Close();
-                        }
-                    }
-                }
-
                 return result;
             }
 
             set {
                 RegistryKey regkey = null;
                 try {
-                    regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot);
+                    regkey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry64).CreateSubKey(CoAppRegRoot);
 
                     if (null == regkey) {
                         return;
@@ -231,27 +216,6 @@ namespace CoApp.Installer {
                 finally {
                     if (null != regkey) {
                         regkey.Close();
-                    }
-                }
-
-
-                if (IntPtr.Size == 8) {
-                    // x64 platform, set the x86 key as well.
-                    try {
-                        regkey = Registry.LocalMachine.CreateSubKey(CoAppRegRoot2);
-
-                        if (null == regkey) {
-                            return;
-                        }
-
-                        regkey.SetValue(CoAppInstallerKey, value);
-                    }
-                    catch {
-                    }
-                    finally {
-                        if (null != regkey) {
-                            regkey.Close();
-                        }
                     }
                 }
             }
